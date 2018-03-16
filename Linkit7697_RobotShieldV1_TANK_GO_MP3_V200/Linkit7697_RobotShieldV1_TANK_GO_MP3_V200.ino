@@ -1,4 +1,4 @@
-// 最後編輯 2018-2-14 by ShinWei Chiou
+// 最後編輯 2018-3-16 by ShinWei Chiou
 
 // DFPlayer mini mp3 module.
 // github as default source provider
@@ -43,11 +43,18 @@ LRemoteButton firebutton;
 LRemoteButton reloadbutton;
 LRemoteButton repairsbutton;
 LRemoteSlider turretslider;
-LRemoteButton musicbuttonA;
-LRemoteButton musicbuttonB;
-LRemoteButton musicbuttonC;
-LRemoteButton musicbuttonD;
-LRemoteButton volumebutton;
+LRemoteButton turretcenterbutton;
+LRemoteButton musicbutton1;
+LRemoteButton musicbutton2;
+LRemoteButton musicbutton3;
+LRemoteButton musicbutton4;
+LRemoteButton musicbutton5;
+LRemoteButton musicbutton6;
+LRemoteButton musicbutton7;
+LRemoteButton musicbutton8;
+LRemoteButton musicbutton9;
+LRemoteButton volmaxbutton;
+LRemoteButton volminbutton;
 LRemoteButton mutebutton;
 
 // Battery
@@ -59,18 +66,24 @@ const int BuzzerPin = 15;
 
 // Servo
 const int ServoPin = 5;
-int iTurretSlider = 90;
+const int TurretTurnCenter = 90;
+const int TurretTurnMax = 160;
+const int TurretTurnMin = 10;
+int Turret_Turn_Value = TurretTurnCenter;
 
 // IR Battle System
 const int IR_Button_Pin = 6;
 const int IR_Receiver_Pin = 9;
 const int IR_LED_Pin = 11;
 const int Damage_Value = 25;
-int IR_Value = 0;
+const int Tank_AM_MaxValue = 5;
 int Tank_HP_Value = 100;
-int Tank_AM_Value = 5;
+int Tank_AM_Value = Tank_AM_MaxValue;
+int IR_Value = 0;
 
 // Music
+const int VolumeMax = 30;
+const int VolumeMin = 5;
 int Volume_Value = 15;
 
 // Create Servo object
@@ -199,7 +212,7 @@ void Move_Damage()
   delay(300);
   TurretServo.write(120);
   delay(300);
-  TurretServo.write(iTurretSlider);
+  TurretServo.write(Turret_Turn_Value);
   delay(300);
 }
 
@@ -237,16 +250,17 @@ void setup() {
   // Setup the Remote Control's UI canvas
   LRemote.setName("V1-TANK");
   LRemote.setOrientation(RC_PORTRAIT);
-  LRemote.setGrid(6, 12);
+  LRemote.setGrid(9, 16);
 
   // Add a text Title label
-  Titlelabel.setText("Infrared Battle Tank V1.0");
+  Titlelabel.setText("Infrared Battle Tank V2.0");
   Titlelabel.setPos(2, 0);
-  Titlelabel.setSize(4, 1);
+  Titlelabel.setSize(7, 1);
   Titlelabel.setColor(RC_GREY);
   LRemote.addControl(Titlelabel);
 
-  Batterylabel.setText("Battery 4.5V");
+  // Add a text Battery label
+  Batterylabel.setText("0.0V");
   Batterylabel.setPos(0, 0);
   Batterylabel.setSize(2, 1);
   Batterylabel.setColor(RC_GREY);
@@ -255,122 +269,165 @@ void setup() {
   // Add a text HP label
   HPlabelT.setText("+HP");
   HPlabelT.setPos(0, 1);
-  HPlabelT.setSize(2, 1);
+  HPlabelT.setSize(2, 2);
   HPlabelT.setColor(RC_GREY);
   LRemote.addControl(HPlabelT);
 
   HPlabelS.setText("100%");
-  HPlabelS.setPos(0, 2);
-  HPlabelS.setSize(2, 1);
+  HPlabelS.setPos(2, 1);
+  HPlabelS.setSize(2, 2);
   HPlabelS.setColor(RC_GREY);
   LRemote.addControl(HPlabelS);
 
   // Add a text AMMO label
   AMlabelT.setText("AMMO");
-  AMlabelT.setPos(4, 1);
-  AMlabelT.setSize(2, 1);
+  AMlabelT.setPos(5, 1);
+  AMlabelT.setSize(2, 2);
   AMlabelT.setColor(RC_GREY);
   LRemote.addControl(AMlabelT);
 
-  AMlabelS.setText("5");
-  AMlabelS.setPos(4, 2);
-  AMlabelS.setSize(2, 1);
+  AMlabelS.setText(String(Tank_AM_Value, 10));
+  AMlabelS.setPos(7, 1);
+  AMlabelS.setSize(2, 2);
   AMlabelS.setColor(RC_GREY);
   LRemote.addControl(AMlabelS);
 
   // Add a Forward button
-  forwardbutton.setText("Forward");
-  forwardbutton.setPos(2, 1);
-  forwardbutton.setSize(2, 2);
+  forwardbutton.setText("↑");
+  forwardbutton.setPos(2, 3);
+  forwardbutton.setSize(2, 3);
   forwardbutton.setColor(RC_BLUE);
   LRemote.addControl(forwardbutton);
 
   // Add a Backward button
-  backwardbutton.setText("Backward");
-  backwardbutton.setPos(2, 3);
-  backwardbutton.setSize(2, 2);
+  backwardbutton.setText("↓");
+  backwardbutton.setPos(2, 7);
+  backwardbutton.setSize(2, 3);
   backwardbutton.setColor(RC_BLUE);
   LRemote.addControl(backwardbutton);
 
   // Add a TurnLeft button
-  turnleftbutton.setText("TurnLeft");
-  turnleftbutton.setPos(0, 3);
-  turnleftbutton.setSize(2, 2);
+  turnleftbutton.setText("←");
+  turnleftbutton.setPos(0, 5);
+  turnleftbutton.setSize(2, 3);
   turnleftbutton.setColor(RC_BLUE);
   LRemote.addControl(turnleftbutton);
 
   // Add a TurnRight button
-  turnrightbutton.setText("TurnRight");
-  turnrightbutton.setPos(4, 3);
-  turnrightbutton.setSize(2, 2);
+  turnrightbutton.setText("→");
+  turnrightbutton.setPos(4, 5);
+  turnrightbutton.setSize(2, 3);
   turnrightbutton.setColor(RC_BLUE);
   LRemote.addControl(turnrightbutton);
 
-  // Add a Fire button
-  firebutton.setText("Fire");
-  firebutton.setPos(0, 7);
-  firebutton.setSize(6, 2);
-  firebutton.setColor(RC_PINK);
-  LRemote.addControl(firebutton);
-
-  // Add a Repairs button
-  repairsbutton.setText("Repairs");
-  repairsbutton.setPos(0, 9);
-  repairsbutton.setSize(3, 2);
-  repairsbutton.setColor(RC_GREEN);
-  LRemote.addControl(repairsbutton);
-
   // Add a Reload button
-  reloadbutton.setText("Reload");
-  reloadbutton.setPos(3, 9);
+  reloadbutton.setText("RELOAD");
+  reloadbutton.setPos(6, 3);
   reloadbutton.setSize(3, 2);
   reloadbutton.setColor(RC_GREEN);
   LRemote.addControl(reloadbutton);
 
+  // Add a Fire button
+  firebutton.setText("FIRE");
+  firebutton.setPos(6, 5);
+  firebutton.setSize(3, 3);
+  firebutton.setColor(RC_PINK);
+  LRemote.addControl(firebutton);
+
+  // Add a Repairs button
+  repairsbutton.setText("REPAIRS");
+  repairsbutton.setPos(6, 8);
+  repairsbutton.setSize(3, 2);
+  repairsbutton.setColor(RC_GREEN);
+  LRemote.addControl(repairsbutton);
+
+  // Add a Turret center button
+  turretcenterbutton.setText("⌂");
+  turretcenterbutton.setPos(2, 6);
+  turretcenterbutton.setSize(2, 1);
+  turretcenterbutton.setColor(RC_ORANGE);
+  LRemote.addControl(turretcenterbutton);
+
   // Add a Turret slider
-  turretslider.setText("Turret Slider (10 ~ 160)");
-  turretslider.setPos(0, 5);
-  turretslider.setSize(6, 2);
+  turretslider.setText("Turret Slider");
+  turretslider.setPos(0, 10);
+  turretslider.setSize(9, 3);
   turretslider.setColor(RC_ORANGE);
-  turretslider.setValueRange(10, 160, 90);
+  turretslider.setValueRange(TurretTurnMin, TurretTurnMax, TurretTurnCenter);
   LRemote.addControl(turretslider);
 
   // Add a Music button
-  musicbuttonA.setText("♫1");
-  musicbuttonA.setPos(0, 11);
-  musicbuttonA.setSize(1, 1);
-  musicbuttonA.setColor(RC_GREY);
-  LRemote.addControl(musicbuttonA);
+  musicbutton1.setText("♫1");
+  musicbutton1.setPos(0, 13);
+  musicbutton1.setSize(2, 1);
+  musicbutton1.setColor(RC_GREY);
+  LRemote.addControl(musicbutton1);
 
-  musicbuttonB.setText("♫2");
-  musicbuttonB.setPos(1, 11);
-  musicbuttonB.setSize(1, 1);
-  musicbuttonB.setColor(RC_GREY);
-  LRemote.addControl(musicbuttonB);
+  musicbutton2.setText("♫2");
+  musicbutton2.setPos(2, 13);
+  musicbutton2.setSize(2, 1);
+  musicbutton2.setColor(RC_GREY);
+  LRemote.addControl(musicbutton2);
 
-  musicbuttonC.setText("♫3");
-  musicbuttonC.setPos(2, 11);
-  musicbuttonC.setSize(1, 1);
-  musicbuttonC.setColor(RC_GREY);
-  LRemote.addControl(musicbuttonC);
+  musicbutton3.setText("♫3");
+  musicbutton3.setPos(4, 13);
+  musicbutton3.setSize(2, 1);
+  musicbutton3.setColor(RC_GREY);
+  LRemote.addControl(musicbutton3);
 
-  musicbuttonD.setText("♫4");
-  musicbuttonD.setPos(3, 11);
-  musicbuttonD.setSize(1, 1);
-  musicbuttonD.setColor(RC_GREY);
-  LRemote.addControl(musicbuttonD);
+  musicbutton4.setText("♫4");
+  musicbutton4.setPos(0, 14);
+  musicbutton4.setSize(2, 1);
+  musicbutton4.setColor(RC_GREY);
+  LRemote.addControl(musicbutton4);
+
+  musicbutton5.setText("♫5");
+  musicbutton5.setPos(2, 14);
+  musicbutton5.setSize(2, 1);
+  musicbutton5.setColor(RC_GREY);
+  LRemote.addControl(musicbutton5);
+
+  musicbutton6.setText("♫6");
+  musicbutton6.setPos(4, 14);
+  musicbutton6.setSize(2, 1);
+  musicbutton6.setColor(RC_GREY);
+  LRemote.addControl(musicbutton6);
+
+  musicbutton7.setText("♫7");
+  musicbutton7.setPos(0, 15);
+  musicbutton7.setSize(2, 1);
+  musicbutton7.setColor(RC_GREY);
+  LRemote.addControl(musicbutton7);
+
+  musicbutton8.setText("♫8");
+  musicbutton8.setPos(2, 15);
+  musicbutton8.setSize(2, 1);
+  musicbutton8.setColor(RC_GREY);
+  LRemote.addControl(musicbutton8);
+
+  musicbutton9.setText("♫9");
+  musicbutton9.setPos(4, 15);
+  musicbutton9.setSize(2, 1);
+  musicbutton9.setColor(RC_GREY);
+  LRemote.addControl(musicbutton9);
+
+  volmaxbutton.setText("VOL+");
+  volmaxbutton.setPos(6, 13);
+  volmaxbutton.setSize(3, 1);
+  volmaxbutton.setColor(RC_GREY);
+  LRemote.addControl(volmaxbutton);
+
+  volminbutton.setText("VOL-");
+  volminbutton.setPos(6, 14);
+  volminbutton.setSize(3, 1);
+  volminbutton.setColor(RC_GREY);
+  LRemote.addControl(volminbutton);
 
   mutebutton.setText("MUTE");
-  mutebutton.setPos(4, 11);
-  mutebutton.setSize(1, 1);
+  mutebutton.setPos(6, 15);
+  mutebutton.setSize(3, 1);
   mutebutton.setColor(RC_GREY);
   LRemote.addControl(mutebutton);
-
-  volumebutton.setText("VOL");
-  volumebutton.setPos(5, 11);
-  volumebutton.setSize(1, 1);
-  volumebutton.setColor(RC_GREY);
-  LRemote.addControl(volumebutton);
 
   // Start broadcasting our remote contoller
   LRemote.begin();
@@ -400,13 +457,13 @@ void loop() {
 
   // Battery Voltage
   BatteryVol = analogRead(BatteryPIN) * 0.00177;
-  Batterylabel.updateText("Battery " + String(BatteryVol, 2) + "V");
+  Batterylabel.updateText(String(BatteryVol, 2) + "V");
 
 
   // Tank HP Limit
   if (Tank_HP_Value >= 1)
   {
-
+    /*----------------------------------*/
     // Move
     if (forwardbutton.isValueChanged())
     {
@@ -453,16 +510,28 @@ void loop() {
     }
 
 
+    /*----------------------------------*/
     // Turret
+    if (turretcenterbutton.isValueChanged())
+    {
+      if (turretcenterbutton.getValue() == 1)
+      {
+        Turret_Turn_Value = TurretTurnCenter;
+        TurretServo.write(TurretTurnCenter);
+        delay(100);
+      }
+    }
+
     if (turretslider.isValueChanged())
     {
       Titlelabel.updateText("Tank Go!");
 
-      iTurretSlider = 180 - turretslider.getValue();
-      TurretServo.write(iTurretSlider);
+      Turret_Turn_Value = 180 - turretslider.getValue();
+      TurretServo.write(Turret_Turn_Value);
     }
 
 
+    /*----------------------------------*/
     // Fire
     if (firebutton.isValueChanged())
     {
@@ -502,39 +571,48 @@ void loop() {
       }
     }
 
-
-    // Reload
-    if (reloadbutton.isValueChanged())
-    {
-      if (reloadbutton.getValue() == 1)
-      {
-        if ( Tank_AM_Value < 5)
-        {
-          mp3_set_volume (Volume_Value);
-          delay(10);
-          mp3_play (3);
-
-          Tank_AM_Value++;
-
-          AMlabelS.updateText(String(Tank_AM_Value, 10));
-
-          Titlelabel.updateText("Reloading !");
-
-          delay (500);
-          mp3_stop ();
-        }
-        else
-        {
-          Titlelabel.updateText("Full Ammo !");
-        }
-
-        Serial.println("Reload Tank_AT_Value");
-      }
-    }
-
   }
 
 
+  /*----------------------------------*/
+  // Reload
+  if (reloadbutton.isValueChanged())
+  {
+    if (reloadbutton.getValue() == 1)
+    {
+      if ( Tank_AM_Value < Tank_AM_MaxValue)
+      {
+        mp3_set_volume (Volume_Value);
+        delay(10);
+        mp3_play (3);
+
+        Titlelabel.updateText("Please Wait ...");
+
+        for (int iAM = Tank_AM_Value; iAM <= Tank_AM_MaxValue; iAM++)
+        {
+          Tank_AM_Value = iAM;
+
+          AMlabelS.updateText(String(Tank_AM_Value, 10));
+
+          delay(200);
+        }
+
+        Titlelabel.updateText("Completed !");
+
+        Serial.println("Reload Tank_AT_Value");
+
+        delay(100);
+        mp3_stop ();
+      }
+      else
+      {
+        Titlelabel.updateText("Full Ammo !");
+      }
+    }
+  }
+
+
+  /*----------------------------------*/
   // IR Test Button
   if (digitalRead(IR_Button_Pin) == HIGH)
   {
@@ -546,6 +624,7 @@ void loop() {
   }
 
 
+  /*----------------------------------*/
   // IR Battle System
   if (digitalRead(IR_Receiver_Pin) == LOW)
   {
@@ -585,6 +664,7 @@ void loop() {
   }
 
 
+  /*----------------------------------*/
   // Repairs
   if (repairsbutton.isValueChanged())
   {
@@ -622,58 +702,7 @@ void loop() {
   }
 
 
-  // Play Music A
-  if (musicbuttonA.isValueChanged())
-  {
-    if (musicbuttonA.getValue() == 1)
-    {
-      Titlelabel.updateText("Katyusha");
-
-      mp3_set_volume (Volume_Value);
-      delay(10);
-      mp3_play (10);
-    }
-  }
-
-  // Play Music B
-  if (musicbuttonB.isValueChanged())
-  {
-    if (musicbuttonB.getValue() == 1)
-    {
-      Titlelabel.updateText("Panzerlied");
-
-      mp3_set_volume (Volume_Value);
-      delay(10);
-      mp3_play (11);
-    }
-  }
-
-  // Play Music C
-  if (musicbuttonC.isValueChanged())
-  {
-    if (musicbuttonC.getValue() == 1)
-    {
-      Titlelabel.updateText("Marching");
-
-      mp3_set_volume (Volume_Value);
-      delay(10);
-      mp3_play (12);
-    }
-  }
-
-  // Play Music D
-  if (musicbuttonD.isValueChanged())
-  {
-    if (musicbuttonD.getValue() == 1)
-    {
-      Titlelabel.updateText("Engine Start !");
-
-      mp3_set_volume (Volume_Value);
-      delay(10);
-      mp3_play (13);
-    }
-  }
-
+  /*----------------------------------*/
   // Mute Music
   if (mutebutton.isValueChanged())
   {
@@ -686,26 +715,164 @@ void loop() {
   }
 
   // Adjust Volume Music
-  if (volumebutton.isValueChanged())
+  if (volmaxbutton.isValueChanged())
   {
-    if (volumebutton.getValue() == 1)
+    if (volmaxbutton.getValue() == 1)
     {
       if (Volume_Value < 30)
       {
         Volume_Value = Volume_Value + 5;
+
+        Titlelabel.updateText("Volume = " + String(Volume_Value, 10));
+
+        mp3_set_volume (Volume_Value);
+        delay(10);
       }
       else
       {
-        Volume_Value = 5;
+        Titlelabel.updateText("Volume = Max");
       }
+    }
+  }
 
-      Titlelabel.updateText("Volume = " + String(Volume_Value, 10));
+  if (volminbutton.isValueChanged())
+  {
+    if (volminbutton.getValue() == 1)
+    {
+      if (Volume_Value > 5)
+      {
+        Volume_Value = Volume_Value - 5;
+
+        Titlelabel.updateText("Volume = " + String(Volume_Value, 10));
+
+        mp3_set_volume (Volume_Value);
+        delay(10);
+      }
+      else
+      {
+        Titlelabel.updateText("Volume = Min");
+      }
+    }
+  }
+
+
+  /*----------------------------------*/
+  // Play Music 1
+  if (musicbutton1.isValueChanged())
+  {
+    if (musicbutton1.getValue() == 1)
+    {
+      Titlelabel.updateText("Katyusha");
 
       mp3_set_volume (Volume_Value);
       delay(10);
+      mp3_play (10);
     }
   }
-  
+
+  // Play Music 2
+  if (musicbutton2.isValueChanged())
+  {
+    if (musicbutton2.getValue() == 1)
+    {
+      Titlelabel.updateText("Panzerlied");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (11);
+    }
+  }
+
+  // Play Music 3
+  if (musicbutton3.isValueChanged())
+  {
+    if (musicbutton3.getValue() == 1)
+    {
+      Titlelabel.updateText("Marching");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (12);
+    }
+  }
+
+  // Play Music 4
+  if (musicbutton4.isValueChanged())
+  {
+    if (musicbutton4.getValue() == 1)
+    {
+      Titlelabel.updateText("Engine Start !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (13);
+    }
+  }
+
+  // Play Music 5
+  if (musicbutton5.isValueChanged())
+  {
+    if (musicbutton5.getValue() == 1)
+    {
+      Titlelabel.updateText("No File !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (14);
+    }
+  }
+
+  // Play Music 6
+  if (musicbutton6.isValueChanged())
+  {
+    if (musicbutton6.getValue() == 1)
+    {
+      Titlelabel.updateText("No File !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (15);
+    }
+  }
+
+  // Play Music 7
+  if (musicbutton7.isValueChanged())
+  {
+    if (musicbutton7.getValue() == 1)
+    {
+      Titlelabel.updateText("No File !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (16);
+    }
+  }
+
+  // Play Music 8
+  if (musicbutton8.isValueChanged())
+  {
+    if (musicbutton8.getValue() == 1)
+    {
+      Titlelabel.updateText("No File !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (17);
+    }
+  }
+
+  // Play Music 9
+  if (musicbutton9.isValueChanged())
+  {
+    if (musicbutton9.getValue() == 1)
+    {
+      Titlelabel.updateText("No File !");
+
+      mp3_set_volume (Volume_Value);
+      delay(10);
+      mp3_play (18);
+    }
+  }
 
 }
 
